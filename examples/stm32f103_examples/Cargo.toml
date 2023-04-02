@@ -1,0 +1,16 @@
+[package]
+name = "stm32-examples"
+version = "0.1.2"
+authors = ["Jordan Aceto <jordanaceto@gmail.com>"]
+edition = "2021"
+publish = false
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+cortex-m-semihosting = "0.5"
+panic-semihosting = "0.6"
+nb = "1.0.0"
+stm32f1xx-hal = {version = "0.10", features = ["rt", "stm32f103", "medium"]}
+panic-halt = "0.2.0"
+synth-utils = { path = "../../" }
