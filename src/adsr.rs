@@ -290,7 +290,7 @@ const TOT_NUM_ACCUM_BITS: u32 = 24;
 /// The number of index bits, depends on the lookup tables used
 ///
 /// Note that the lookup table size MUST be a power of 2
-const NUM_LUT_INDEX_BITS: u32 = 10; //lookup_tables::ADSR_CURVE_LUT_SIZE.ilog2();
+const NUM_LUT_INDEX_BITS: u32 = ilog_2(lookup_tables::ADSR_CURVE_LUT_SIZE);
 
 #[cfg(test)]
 mod tests {
