@@ -1,0 +1,14 @@
+[package]
+name = "synth-utils"
+version = "0.1.0"
+edition = "2021"
+authors = ["Jordan Aceto <jordanaceto@gmail.com>"]
+license = "MIT"
+description = "Music synthesizer utilities and modulation sources"
+repository = "https://github.com/JordanAceto/synth-utils-rs"
+categories = ["embedded", "multimedia::audio", "no-std"]
+keywords = ["audio", "synth", "adsr", "lfo"]
+readme = "README.md"
+
+[dev-dependencies]
+plotters = "0.3.1"
