@@ -2,7 +2,7 @@
 #
 # File Description:
 #   This python script generates Rust language code files containing the
-#   attack and decay lookup-tables used by the system.
+#   sine, attack, and decay lookup-tables used by the system.
 #
 #   The attack LUT is a truncated rising rc curve and the decay LUT is a decaying
 #   rc curve. The decay LUT is used for both the decay and release phases.
@@ -14,8 +14,8 @@
 #
 #   Default values are provided for the attack target and number of time constants,
 #   so these are not mandatory to enter. However, if the user wants to experiment
-#   with different curve shapes, a quick way to do it is to experimentally plot
-#   some different shapes, and then when you have shapes that seem interesting
+#   with different ADSR curve shapes, a quick way to do it is to experimentally
+#   plot some different shapes, and then when you have shapes that seem interesting
 #   write the LUTs with the same values.
 #
 ################################################################################
@@ -28,7 +28,8 @@ from matplotlib import pyplot as plt
 OUTPUT_FILE_PATH = "../src/lookup_tables.rs"
 
 # the lookup table size, must be a power of 2
-LUT_SIZE = 2**10
+ADSR_LUT_SIZE = 2**10
+SINE_LUT_SIZE = 2**10
 
 # arguments decide whether to plot the curves or write the c files, and allow the
 # user to modify the shape of the curves
@@ -73,27 +74,32 @@ ATTACK_TARGET = args.attack_target
 NUM_TIME_CONSTANTS = args.num_time_constants
 
 # the linear input to transform into the attack and decay curves
-X = np.linspace(0, NUM_TIME_CONSTANTS, LUT_SIZE)
+X = np.linspace(0, NUM_TIME_CONSTANTS, ADSR_LUT_SIZE)
 
 # generate the attack curve, range [0, 1], increasing truncated rc curve
-y_a = 1 - np.exp(-X / ATTACK_TARGET)
-y_a = y_a / y_a.max()  # range [0, 1]
-y_a = np.float32(y_a)  # avoid excessive precision
+adsr_attack_lut = 1 - np.exp(-X / ATTACK_TARGET)
+adsr_attack_lut = adsr_attack_lut / adsr_attack_lut.max()  # range [0, 1]
+adsr_attack_lut = np.float32(adsr_attack_lut)  # avoid excessive precision
 
 # generate the decay/release curve, range [0, 1], decreasing rc curve
-y_d = np.exp(-X)
-y_d = y_d - y_d.min()  # end at zero
-y_d = y_d / y_d.max()  # range [0, 1]
-y_d = np.float32(y_d)
+adsr_decay_lut = np.exp(-X)
+adsr_decay_lut = adsr_decay_lut - adsr_decay_lut.min()  # end at zero
+adsr_decay_lut = adsr_decay_lut / adsr_decay_lut.max()  # range [0, 1]
+adsr_decay_lut = np.float32(adsr_decay_lut)
+
+# sine lut is pretty straightforward
+sine_lut = np.float32(np.sin(np.linspace(0, 2*np.pi, SINE_LUT_SIZE)))
 
 if (args.action == 'plot'):  # graphically plot the curves
     fig = plt.figure()
     ax = fig.add_subplot()
 
-    ax.plot(np.linspace(0, LUT_SIZE-1, LUT_SIZE), y_a, label="attack")
-    ax.plot(np.linspace(0, LUT_SIZE-1, LUT_SIZE), y_d, label="decay")
+    ax.plot(np.linspace(0, ADSR_LUT_SIZE-1, ADSR_LUT_SIZE),
+            adsr_attack_lut, label="attack")
+    ax.plot(np.linspace(0, ADSR_LUT_SIZE-1, ADSR_LUT_SIZE),
+            adsr_decay_lut, label="decay")
 
-    plt.suptitle(f"Attack and decay lookup tables with {LUT_SIZE} points")
+    plt.suptitle(f"Attack and decay lookup tables with {ADSR_LUT_SIZE} points")
     plt.title(
         f'attack target: {ATTACK_TARGET}\nnum time constants: {NUM_TIME_CONSTANTS}')
     plt.xlabel("LUT index")
@@ -101,11 +107,14 @@ if (args.action == 'plot'):  # graphically plot the curves
     plt.legend()
 
     plt.show()
-elif (args.action == 'write'):  # write the c-header file
+elif (args.action == 'write'):
 
-    LUT_SIZE_CONSTANT = f'pub const ADSR_CURVE_LUT_SIZE: usize = {LUT_SIZE};\n\n'
+    SINE_LUT_SIZE_CONSTANT = f'pub const SINE_LUT_SIZE: usize = {SINE_LUT_SIZE};\n\n'
+
+    ADSR_LUT_SIZE_CONSTANT = f'pub const ADSR_CURVE_LUT_SIZE: usize = {ADSR_LUT_SIZE};\n\n'
 
     # allow approx constant so clippy doesn't complain about the ln(2) that shows up
+    SINE_TABLE_TYPE = f'#[allow(clippy::approx_constant)]\npub const SINE_TABLE: [f32; SINE_LUT_SIZE]'
     ATTACK_TABLE_TYPE = f'#[allow(clippy::approx_constant)]\npub const ADSR_ATTACK_TABLE: [f32; ADSR_CURVE_LUT_SIZE]'
     DECAY_TABLE_TYPE = f'#[allow(clippy::approx_constant)]\npub const ADSR_DECAY_TABLE: [f32; ADSR_CURVE_LUT_SIZE]'
 
@@ -125,13 +134,20 @@ elif (args.action == 'write'):  # write the c-header file
 
     with open(OUTPUT_FILE_PATH, 'w') as writer:
         writer.write(top_of_file_comment)
-        writer.write(LUT_SIZE_CONSTANT)
+
+        writer.write(SINE_LUT_SIZE_CONSTANT)
+        writer.write(SINE_TABLE_TYPE + ' = [\n')
+        writer.writelines("%s,\n" % strip_extra_zeros_in_small_exp(y)
+                          for y in sine_lut)
+        writer.write(end_of_lut + '\n')
+
+        writer.write(ADSR_LUT_SIZE_CONSTANT)
         writer.write(ATTACK_TABLE_TYPE + ' = [\n')
         writer.writelines("%s,\n" % strip_extra_zeros_in_small_exp(y)
-                          for y in y_a)
+                          for y in adsr_attack_lut)
         writer.write(end_of_lut + '\n')
 
         writer.write(DECAY_TABLE_TYPE + ' = [\n')
         writer.writelines("%s,\n" % strip_extra_zeros_in_small_exp(y)
-                          for y in y_d)
+                          for y in adsr_decay_lut)
         writer.write(end_of_lut)
