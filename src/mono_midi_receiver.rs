@@ -403,7 +403,7 @@ mod tests {
     }
 
     #[test]
-    fn get_goes_on_with_note_on() {
+    fn gate_goes_on_with_note_on() {
         let mut mr = MonoMidiReceiver::new(1);
         mr.parse(0x91);
         mr.parse(42);
@@ -412,7 +412,7 @@ mod tests {
     }
 
     #[test]
-    fn get_goes_off_with_note_off() {
+    fn gate_goes_off_with_note_off() {
         let mut mr = MonoMidiReceiver::new(1);
         mr.parse(0x91);
         mr.parse(42);
@@ -425,7 +425,7 @@ mod tests {
     }
 
     #[test]
-    fn get_stays_on_if_any_notes_left_on() {
+    fn gate_stays_on_if_any_notes_left_on() {
         let mut mr = MonoMidiReceiver::new(1);
         mr.parse(0x91);
         mr.parse(42);
@@ -446,7 +446,7 @@ mod tests {
     }
 
     #[test]
-    fn get_turns_off_when_all_notes_are_off() {
+    fn gate_turns_off_when_all_notes_are_off() {
         let mut mr = MonoMidiReceiver::new(1);
         mr.parse(0x91);
         mr.parse(42);
