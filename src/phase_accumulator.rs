@@ -89,6 +89,7 @@ impl<const TOTAL_NUM_BITS: u32, const NUM_INDEX_BITS: u32>
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::*;
 
     #[test]
     fn tick_advances_output() {
@@ -148,9 +149,5 @@ mod tests {
         // one more tick rolls back to the beginning
         pa.tick();
         assert!(is_almost(pa.get_ramp(), 0.0, epsilon));
-    }
-
-    fn is_almost(v1: f32, v2: f32, eps: f32) -> bool {
-        (v1 - v2).abs() < eps
     }
 }
