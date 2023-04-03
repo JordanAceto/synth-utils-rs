@@ -105,3 +105,116 @@ const TOT_NUM_ACCUM_BITS: u32 = 24;
 ///
 /// Note that the lookup table size MUST be a power of 2
 const NUM_LUT_INDEX_BITS: u32 = ilog_2(lookup_tables::SINE_LUT_SIZE);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sqr_starts_high_and_then_goes_low() {
+        let mut lfo = Lfo::new(1_000.0_f32);
+        lfo.set_frequency(1.0);
+
+        assert_eq!(lfo.get(Waveshape::Square), 1.0);
+
+        // tick halfway through 1 cycle
+        for _ in 0..500 {
+            lfo.tick();
+        }
+        assert_eq!(lfo.get(Waveshape::Square), 1.0);
+
+        // one mode tick makes it flop the low half of the cycle
+        lfo.tick();
+        assert_eq!(lfo.get(Waveshape::Square), -1.0);
+    }
+
+    #[test]
+    fn triangle_goes_up_then_down_then_back_up() {
+        let epsilon = 0.0001;
+
+        let mut lfo = Lfo::new(1_000.0_f32);
+        lfo.set_frequency(1.0);
+
+        assert_eq!(lfo.get(Waveshape::Triangle), 0.0);
+
+        // tick 1/4 through 1 cycle, just hit the positive peak
+        for _ in 0..250 {
+            lfo.tick();
+        }
+        assert!(is_almost(lfo.get(Waveshape::Triangle), 1.0, epsilon));
+
+        // tick to the halfway point, back to zero
+        for _ in 0..250 {
+            lfo.tick();
+        }
+        assert!(is_almost(lfo.get(Waveshape::Triangle), 0.0, epsilon));
+
+        // another quarter cycle puts us at the lowest point
+        for _ in 0..250 {
+            lfo.tick();
+        }
+        assert!(is_almost(lfo.get(Waveshape::Triangle), -1.0, epsilon));
+    }
+
+    #[test]
+    fn check_a_few_sine_points() {
+        let epsilon = 0.001;
+
+        let mut lfo = Lfo::new(10_000.0_f32);
+        lfo.set_frequency(1.0);
+
+        // tick 1/10 through 1 cycle
+        for _ in 0..1_000 {
+            lfo.tick();
+        }
+
+        assert!(is_almost(
+            lfo.get(Waveshape::Sine),
+            f32::sin(core::f32::consts::PI / 5.),
+            epsilon
+        ));
+
+        // tick to about 45 degrees, but we won't hit it exactly
+        for _ in 0..250 {
+            lfo.tick();
+        }
+        assert!(
+            (1. / 2.) < lfo.get(Waveshape::Sine) && lfo.get(Waveshape::Sine) < (f32::sqrt(3.) / 2.)
+        );
+
+        // tick a bit past 330 degrees
+        for _ in 0..7915 {
+            lfo.tick();
+        }
+        assert!((-1. / 2.) < lfo.get(Waveshape::Sine) && lfo.get(Waveshape::Sine) < 0.);
+    }
+
+    #[test]
+    fn up_saw_is_monotonic_rising() {
+        let mut lfo = Lfo::new(100.0_f32);
+        lfo.set_frequency(1.0);
+
+        let mut last_val = -1.1;
+
+        for _ in 0..100 {
+            lfo.tick();
+            assert!(last_val < lfo.get(Waveshape::UpSaw));
+            last_val = lfo.get(Waveshape::UpSaw);
+        }
+
+        // one more tick rolls it over
+        lfo.tick();
+        assert!(lfo.get(Waveshape::UpSaw) < last_val);
+    }
+
+    #[test]
+    fn down_saw_is_just_negated_up_saw() {
+        let mut lfo = Lfo::new(100.0_f32);
+        lfo.set_frequency(1.0);
+
+        for _ in 0..100 {
+            lfo.tick();
+            assert_eq!(lfo.get(Waveshape::UpSaw), -lfo.get(Waveshape::DownSaw));
+        }
+    }
+}
