@@ -10,5 +10,9 @@ categories = ["embedded", "multimedia::audio", "no-std"]
 keywords = ["audio", "synth", "adsr", "lfo"]
 readme = "README.md"
 
+[dependencies]
+heapless = "0.7"
+midi-convert = { git = "https://github.com/JordanAceto/midi-convert" }
+
 [dev-dependencies]
 plotters = "0.3.1"
