@@ -1,4 +1,5 @@
-# Rust Synth-Utils
+# Rust Synth-Utils [![Build](https://github.com/JordanAceto/synth-utils-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/JordanAceto/synth-utils-rs/actions/workflows/ci.yml)
+
 
 ## Lightweight modulation sources and utilities for music synthesizers
 
