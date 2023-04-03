@@ -5,12 +5,13 @@
 #   sine, attack, and decay lookup-tables used by the system.
 #
 #   The attack LUT is a truncated rising rc curve and the decay LUT is a decaying
-#   rc curve. The decay LUT is used for both the decay and release phases.
+#   rc curve. The decay LUT is used for both the ADSR decay and release phases.
 #
-#   This script is invoked from the Makefile by:
-#       $ make write_lut ATTACK_TARGET=xxx NUM_TIME_CONSTANTS=xxx
-#   or
-#       $ make plot_lut ATTACK_TARGET=xxx NUM_TIME_CONSTANTS=xxx
+#   To write the rust language source code file:
+#   $ python lookup_table_gen.py write [--attack_target=xxx] [--num_time_constants=xxx]
+#
+#   To see a graphical plot of the attack and decay curves
+#   $ python lookup_table_gen.py plot [--attack_target=xxx] [--num_time_constants=xxx]
 #
 #   Default values are provided for the attack target and number of time constants,
 #   so these are not mandatory to enter. However, if the user wants to experiment
@@ -37,12 +38,12 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument(
     'action',
-    help='the action to do, either graphically plot the LUT, or generate and write the c files',
+    help='the action to do, either graphically plot the attack and decay LUTs, or generate and write the c files',
     choices=['plot', 'write']
 )
 
 parser.add_argument(
-    'attack_target',
+    '--attack_target',
     help='the target value for the attack curve, useful range: [1..5]',
     nargs='?',
     default=3.0,
@@ -50,7 +51,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    'num_time_constants',
+    '--num_time_constants',
     help='the number of time constants to extend the attack and decay curves, useful range: [3..10]',
     nargs='?',
     default=4.0,
