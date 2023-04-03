@@ -51,11 +51,6 @@ impl<const TOTAL_NUM_BITS: u32, const NUM_INDEX_BITS: u32>
         self.set_frequency(1.0_f32 / period_sec)
     }
 
-    /// `pa.get_value()` is the current value of the phase accumulator as an integer in `[0..(2^TOTAL_NUM_BITS - 1)]`
-    pub fn get_value(&self) -> u32 {
-        self.accumulator
-    }
-
     // `pa.get_ramp()` is the current value of the phase accumulator as a number in `[0.0, 1.0]`
     pub fn get_ramp(&self) -> f32 {
         self.accumulator as f32 / ((1 << TOTAL_NUM_BITS) as f32)
@@ -132,9 +127,9 @@ mod tests {
         for _ in 0..100 {
             pa.tick();
         }
-        assert!(pa.get_value() != 0);
+        assert!(pa.get_ramp() != 0.0);
         pa.reset();
-        assert!(pa.get_value() == 0);
+        assert!(pa.get_ramp() == 0.0);
     }
 
     #[test]
