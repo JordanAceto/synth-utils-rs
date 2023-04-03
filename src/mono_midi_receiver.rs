@@ -488,6 +488,19 @@ mod tests {
     }
 
     #[test]
+    fn velocity_of_0_turns_existing_note_off() {
+        let mut mr = MonoMidiReceiver::new(1);
+        mr.parse(0x91);
+        mr.parse(42);
+        mr.parse(5); // velocity greated than zero
+        assert!(mr.gate());
+
+        mr.parse(42);
+        mr.parse(0); // velocity is zero
+        assert!(!mr.gate());
+    }
+
+    #[test]
     fn rising_gate_is_self_clearing() {
         let mut mr = MonoMidiReceiver::new(1);
         mr.parse(0x91);
