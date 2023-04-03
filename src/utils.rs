@@ -28,7 +28,16 @@ pub const fn ilog_2(x: usize) -> u32 {
 /// Used primarily in testing, it's ok if nobody else uses it
 #[allow(dead_code)]
 pub fn is_almost(v1: f32, v2: f32, eps: f32) -> bool {
-    (v1 - v2).abs() < eps
+    fabs(v1 - v2) < eps
+}
+
+/// `fabs(v)` is the absolute value of `v`
+pub fn fabs(v: f32) -> f32 {
+    if v < 0.0 {
+        -v
+    } else {
+        v
+    }
 }
 
 #[cfg(test)]
