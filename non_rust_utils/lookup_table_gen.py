@@ -137,17 +137,17 @@ elif (args.action == 'write'):
 
         writer.write(SINE_LUT_SIZE_CONSTANT)
         writer.write(SINE_TABLE_TYPE + ' = [\n')
-        writer.writelines("%s,\n" % strip_extra_zeros_in_small_exp(y)
+        writer.writelines("    %s,\n" % strip_extra_zeros_in_small_exp(y)
                           for y in sine_lut)
         writer.write(end_of_lut + '\n')
 
         writer.write(ADSR_LUT_SIZE_CONSTANT)
         writer.write(ATTACK_TABLE_TYPE + ' = [\n')
-        writer.writelines("%s,\n" % strip_extra_zeros_in_small_exp(y)
+        writer.writelines("    %s,\n" % strip_extra_zeros_in_small_exp(y)
                           for y in adsr_attack_lut)
         writer.write(end_of_lut + '\n')
 
         writer.write(DECAY_TABLE_TYPE + ' = [\n')
-        writer.writelines("%s,\n" % strip_extra_zeros_in_small_exp(y)
+        writer.writelines("    %s,\n" % strip_extra_zeros_in_small_exp(y)
                           for y in adsr_decay_lut)
         writer.write(end_of_lut)
