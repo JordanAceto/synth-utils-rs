@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     adsr.gate_off();
                 }
 
-                let y = adsr.get_value();
+                let y = adsr.value();
                 adsr.tick();
 
                 (x as f32 / num_points as f32, y)

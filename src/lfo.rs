@@ -51,15 +51,15 @@ impl Lfo {
     pub fn get(&self, waveshape: Waveshape) -> f32 {
         match waveshape {
             Waveshape::Sine => {
-                let lut_idx = self.phase_accumulator.get_index();
+                let lut_idx = self.phase_accumulator.index();
                 let next_lut_idx = (lut_idx + 1) % (lookup_tables::SINE_LUT_SIZE - 1);
                 let y0 = lookup_tables::SINE_TABLE[lut_idx];
                 let y1 = lookup_tables::SINE_TABLE[next_lut_idx];
-                linear_interp(y0, y1, self.phase_accumulator.get_fraction())
+                linear_interp(y0, y1, self.phase_accumulator.fraction())
             }
             Waveshape::Triangle => {
                 // convert the phase accum ramp into a triangle in-phase with the sine
-                let raw_ramp = self.phase_accumulator.get_ramp() * 4.0;
+                let raw_ramp = self.phase_accumulator.ramp() * 4.0;
                 if raw_ramp < 1.0_f32 {
                     // starting at zero and ramping up towards positive 1
                     raw_ramp
@@ -71,10 +71,10 @@ impl Lfo {
                     raw_ramp - 4.0_f32
                 }
             }
-            Waveshape::UpSaw => (self.phase_accumulator.get_ramp() * 2.0_f32) - 1.0_f32,
+            Waveshape::UpSaw => (self.phase_accumulator.ramp() * 2.0_f32) - 1.0_f32,
             Waveshape::DownSaw => -self.get(Waveshape::UpSaw),
             Waveshape::Square => {
-                if self.phase_accumulator.get_ramp() < 0.5 {
+                if self.phase_accumulator.ramp() < 0.5 {
                     1.0
                 } else {
                     -1.0

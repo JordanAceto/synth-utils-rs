@@ -76,7 +76,7 @@ fn main() -> ! {
         }
 
         // write the ADSR value via PWM, verify with oscilloscope or LED
-        let adsr_as_pwm = (adsr.get_value() * pwm_max as f32) as u16;
+        let adsr_as_pwm = (adsr.value() * pwm_max as f32) as u16;
         pwm_ch.set_duty(adsr_as_pwm);
         adsr.tick();
 

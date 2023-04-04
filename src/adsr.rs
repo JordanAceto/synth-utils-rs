@@ -134,8 +134,8 @@ impl Adsr {
         }
     }
 
-    /// `adsr.get_value()` is the current value of the ADSR in `[0.0, 1.0]`
-    pub fn get_value(&self) -> f32 {
+    /// `adsr.value()` is the current value of the ADSR in `[0.0, 1.0]`
+    pub fn value(&self) -> f32 {
         self.value
     }
 
@@ -192,7 +192,7 @@ impl Adsr {
         // and the target value for the curve segment.
         let offset: f32;
 
-        let lut_idx = self.phase_accumulator.get_index();
+        let lut_idx = self.phase_accumulator.index();
         // next idx is for interpolation, clamp at the end to avoid bad behavior, we don't want to wrap around here
         let next_lut_idx = (lut_idx + 1).min(lookup_tables::ADSR_CURVE_LUT_SIZE - 1);
 
@@ -201,14 +201,14 @@ impl Adsr {
                 let y0 = lookup_tables::ADSR_ATTACK_TABLE[lut_idx];
                 let y1 = lookup_tables::ADSR_ATTACK_TABLE[next_lut_idx];
                 coefficient = 1.0_f32 - self.value_when_gate_on_received;
-                sample = linear_interp(y0, y1, self.phase_accumulator.get_fraction());
+                sample = linear_interp(y0, y1, self.phase_accumulator.fraction());
                 offset = self.value_when_gate_on_received;
             }
             State::Decay => {
                 let y0 = lookup_tables::ADSR_DECAY_TABLE[lut_idx];
                 let y1 = lookup_tables::ADSR_DECAY_TABLE[next_lut_idx];
                 coefficient = 1.0_f32 - self.sustain_level.0;
-                sample = linear_interp(y0, y1, self.phase_accumulator.get_fraction());
+                sample = linear_interp(y0, y1, self.phase_accumulator.fraction());
                 offset = self.sustain_level.0;
             }
             State::Sustain => {
@@ -220,7 +220,7 @@ impl Adsr {
                 let y0 = lookup_tables::ADSR_DECAY_TABLE[lut_idx];
                 let y1 = lookup_tables::ADSR_DECAY_TABLE[next_lut_idx];
                 coefficient = self.value_when_gate_off_received;
-                sample = linear_interp(y0, y1, self.phase_accumulator.get_fraction());
+                sample = linear_interp(y0, y1, self.phase_accumulator.fraction());
                 offset = 0.0;
             }
             State::AtRest => {

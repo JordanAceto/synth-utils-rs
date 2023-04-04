@@ -51,18 +51,18 @@ impl<const TOTAL_NUM_BITS: u32, const NUM_INDEX_BITS: u32>
         self.set_frequency(1.0_f32 / period_sec)
     }
 
-    // `pa.get_ramp()` is the current value of the phase accumulator as a number in `[0.0, 1.0]`
-    pub fn get_ramp(&self) -> f32 {
+    // `pa.ramp()` is the current value of the phase accumulator as a number in `[0.0, 1.0]`
+    pub fn ramp(&self) -> f32 {
         self.accumulator as f32 / ((1 << TOTAL_NUM_BITS) as f32)
     }
 
-    /// `pa.get_index()` is the current value of the index bits of the phase accumulator
-    pub fn get_index(&self) -> usize {
+    /// `pa.index()` is the current value of the index bits of the phase accumulator
+    pub fn index(&self) -> usize {
         (self.accumulator >> (TOTAL_NUM_BITS - NUM_INDEX_BITS)) as usize
     }
 
-    /// `pa.get_fraction()` is the fractional part of the accumulator as a floating point number in `[0.0, 1.0]`
-    pub fn get_fraction(&self) -> f32 {
+    /// `pa.fraction()` is the fractional part of the accumulator as a floating point number in `[0.0, 1.0]`
+    pub fn fraction(&self) -> f32 {
         ((self.accumulator & self.rollover_mask) as f32) / (self.rollover_mask as f32)
     }
 
@@ -99,9 +99,9 @@ mod tests {
         // one tick should increase the output
         pa.set_period(0.001_f32);
 
-        assert_eq!(pa.get_ramp(), 0.0);
+        assert_eq!(pa.ramp(), 0.0);
         pa.tick();
-        assert!(0.0 < pa.get_ramp());
+        assert!(0.0 < pa.ramp());
     }
 
     #[test]
@@ -110,13 +110,13 @@ mod tests {
         let mut pa = PhaseAccumulator::<24, 8>::new(sample_rate);
         pa.set_period(1.0_f32);
 
-        assert_eq!(pa.get_index(), 0);
+        assert_eq!(pa.index(), 0);
 
         // tick half way through one cycle
         for _ in 0..500 {
             pa.tick();
         }
-        assert_eq!(pa.get_index(), 127);
+        assert_eq!(pa.index(), 127);
     }
 
     #[test]
@@ -128,9 +128,9 @@ mod tests {
         for _ in 0..100 {
             pa.tick();
         }
-        assert!(pa.get_ramp() != 0.0);
+        assert!(pa.ramp() != 0.0);
         pa.reset();
-        assert!(pa.get_ramp() == 0.0);
+        assert!(pa.ramp() == 0.0);
     }
 
     #[test]
@@ -144,10 +144,10 @@ mod tests {
             pa.tick();
         }
         let epsilon = 0.001;
-        assert!(is_almost(pa.get_ramp(), 1.0, epsilon));
+        assert!(is_almost(pa.ramp(), 1.0, epsilon));
 
         // one more tick rolls back to the beginning
         pa.tick();
-        assert!(is_almost(pa.get_ramp(), 0.0, epsilon));
+        assert!(is_almost(pa.ramp(), 0.0, epsilon));
     }
 }
