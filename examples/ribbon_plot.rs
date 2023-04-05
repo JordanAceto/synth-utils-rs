@@ -24,33 +24,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // init the simulated ribbon samples to the out-of-bounds high value 1.0
     let mut mock_adc_signal: [f32; NUM_POINTS] = [1.0; NUM_POINTS];
-    // simulate some finger wiggling
-    // stairstep down pattern
-    mock_adc_signal[1000..5000]
-        .iter_mut()
-        .for_each(|x| *x = 0.80);
-    mock_adc_signal[5000..6000]
-        .iter_mut()
-        .for_each(|x| *x = 0.60);
-    mock_adc_signal[6000..7000]
-        .iter_mut()
-        .for_each(|x| *x = 0.40);
-    mock_adc_signal[7000..8000]
-        .iter_mut()
-        .for_each(|x| *x = 0.30);
-    mock_adc_signal[8000..9000]
-        .iter_mut()
-        .for_each(|x| *x = 0.25);
-    mock_adc_signal[9000..10000]
-        .iter_mut()
-        .for_each(|x| *x = 0.20);
+    // simulate some finger wiggling, the magic number expressions are just to generate some variations in the plot
+    // that show how the ribbon controller responds to some semi-reasonable inputs. feel free to experiment
 
-    // sine simulates vibrato
+    // finger slide from low to high
+    mock_adc_signal[2500..10000]
+        .iter_mut()
+        .enumerate()
+        .for_each(|(i, x)| {
+            *x = i as f32 / 15000.;
+        });
+
+    // sine simulates vibrato and shows clamping at top end
     mock_adc_signal[11000..21000]
         .iter_mut()
         .enumerate()
         .for_each(|(i, x)| {
-            *x = f32::sin(6.238 * (i as f32 / 5000.)) * 0.15 + 0.5;
+            *x = f32::cos(6.238 * (i as f32 / 5000.)) * 0.15 + 0.85;
         });
 
     // finger slide from high to low
@@ -58,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .iter_mut()
         .enumerate()
         .for_each(|(i, x)| {
-            *x = ((37000. - (i as f32 + 25000.)) / 15000.) + 0.15;
+            *x = ((37000. - (i as f32 + 25000.)) / 15000.) + 0.2;
         });
 
     let root =
