@@ -24,11 +24,8 @@ pub const fn ilog_2(x: usize) -> u32 {
 }
 
 /// `is_almost(v1, v2, e)` is true iff `v1` is within `e` of `v2`
-///
-/// Used primarily in testing, it's ok if nobody else uses it
-#[allow(dead_code)]
 pub fn is_almost(v1: f32, v2: f32, eps: f32) -> bool {
-    fabs(v1 - v2) < eps
+    fabs(v1 - v2) <= eps
 }
 
 /// `fabs(v)` is the absolute value of `v`
