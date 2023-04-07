@@ -2,6 +2,7 @@
 #![doc = include_str!("../README.md")]
 
 pub mod adsr;
+pub mod glide_processor;
 pub mod lfo;
 mod lookup_tables;
 pub mod mono_midi_receiver;

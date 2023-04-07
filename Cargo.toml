@@ -13,6 +13,7 @@ readme = "README.md"
 [dependencies]
 heapless = "0.7"
 midi-convert = { git = "https://github.com/JordanAceto/midi-convert" }
+biquad = "0.4"
 
 [dev-dependencies]
 plotters = "0.3.1"
