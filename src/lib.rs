@@ -7,5 +7,6 @@ pub mod lfo;
 mod lookup_tables;
 pub mod mono_midi_receiver;
 mod phase_accumulator;
+pub mod quantizer;
 pub mod ribbon_controller;
 mod utils;
