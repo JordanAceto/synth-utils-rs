@@ -73,6 +73,9 @@ pub struct RibbonController<const BUFFER_CAPACITY: usize> {
     /// the user is pressing the ribbon or not.
     finger_press_high_boundary: f32,
 
+    /// error scaling constant used to un-bend the ribbon which is non-linear due to the pullup resistor
+    error_const: f32,
+
     /// The current position value of the ribbon
     current_val: f32,
 
@@ -106,7 +109,7 @@ pub struct RibbonController<const BUFFER_CAPACITY: usize> {
 }
 
 impl<const BUFFER_CAPACITY: usize> RibbonController<BUFFER_CAPACITY> {
-    /// `Ribbon::new(sr, sp, ur)` is a new Ribbon controller
+    /// `Ribbon::new(sr, sp, dr, pu)` is a new Ribbon controller
     ///
     /// # Arguments:
     ///
@@ -114,12 +117,20 @@ impl<const BUFFER_CAPACITY: usize> RibbonController<BUFFER_CAPACITY> {
     ///
     /// * `softpot_ohms` - The end-to-end resistance of the softpot used, typically 10k or 20k
     ///
-    /// * `upper_resistor_ohms` - The value of the resistor which sits between the top of the softpot and the positive
-    /// voltage reference. Typically under 1k ohm.
-    pub fn new(sample_rate_hz: f32, softpot_ohms: f32, upper_resistor_ohms: f32) -> Self {
+    /// * `dropper_resistor_ohms` - The value of the resistor which sits between the top of the softpot and the positive
+    /// voltage reference.
+    ///
+    /// * `pullup_resistor_ohms` - The value of the wiper pullup reistor, shoudl be at least 10x softpot_ohms or larger
+    pub fn new(
+        sample_rate_hz: f32,
+        softpot_ohms: f32,
+        dropper_resistor_ohms: f32,
+        pullup_resistor_ohms: f32,
+    ) -> Self {
         Self {
             finger_press_high_boundary: 1.0
-                - (upper_resistor_ohms / (upper_resistor_ohms + softpot_ohms)),
+                - (dropper_resistor_ohms / (dropper_resistor_ohms + softpot_ohms)),
+            error_const: (softpot_ohms + dropper_resistor_ohms) / pullup_resistor_ohms,
             current_val: 0.0_f32,
             finger_is_pressing: false,
             finger_just_pressed: false,
@@ -163,6 +174,8 @@ impl<const BUFFER_CAPACITY: usize> RibbonController<BUFFER_CAPACITY> {
                     // shooting up towards full scale when the user lifts their finger
                     self.current_val = self.buff.oldest_ordered().take(num_to_take).sum::<f32>()
                         / (num_to_take as f32);
+
+                    self.current_val -= self.error_estimate(self.current_val);
 
                     // if this flag is false right now then they must have just pressed their finger down
                     if !self.finger_is_pressing {
@@ -222,6 +235,20 @@ impl<const BUFFER_CAPACITY: usize> RibbonController<BUFFER_CAPACITY> {
             false
         }
     }
+
+    /// `rib.error_estimate(p)` is the estimated error at position `p` resulting from the influence of the pullup resistor
+    ///
+    /// The softpot is wired as a voltage divider with an additional pullup resistor from the wiper to the positive ref.
+    /// The pullup resistor bends the Vout so that it is not linear, Vout rises faster than it would without the pullup.
+    ///
+    /// This error estimation approximate, but can help straighten out the ribbon response
+    ///
+    /// # Arguments:
+    ///
+    /// * `pos` - the position value in `[0.0, 1.0]`
+    fn error_estimate(&self, pos: f32) -> f32 {
+        (pos - pos * pos) * self.error_const
+    }
 }
 
 /// The approximate measured time it takes for the ribbon to settle on a low value after the user presses their finger.
@@ -268,7 +295,7 @@ mod tests {
 
     /// `test_ribbon()` is a basic ribbon controller for testing
     fn test_ribbon() -> RibbonController<RIBBON_BUFF_CAPACITY> {
-        RibbonController::new(SAMPLE_RATE as f32, 20E3, 820.0)
+        RibbonController::new(SAMPLE_RATE as f32, 20E3, 820.0, 1E6)
     }
 
     // a bit glass-boxy, but hard to test otherwise, hand calculated by inspecting the code

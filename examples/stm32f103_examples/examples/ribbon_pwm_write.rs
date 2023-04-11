@@ -72,6 +72,7 @@ fn main() -> ! {
         SAMPLE_RATE as f32,
         20_000.0, // end-to-end resistance of the softpot, common value for longer softpots. short ones are 10k
         820.0, // resistance of the series resistor going to vref. Value found to work well, feel free to experiment
+        1E6,   // pullup resistor from the wiper to the positive voltage refererence
     );
 
     loop {

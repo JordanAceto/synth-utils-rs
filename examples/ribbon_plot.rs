@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         SAMPLE_RATE as f32,
         20_000.0, // end-to-end resistance of the softpot, common value for longer softpots. short ones are 10k
         820.0, // resistance of the series resistor going to vref. Value found to work well, feel free to experiment
+        1E6,   // pullup resistor from the wiper to the positive voltage refererence
     );
 
     const NUM_SECS_TO_PLOT: usize = 4;
@@ -59,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .caption("Ribbon Controller", ("Arial", 20).into_font())
         .x_label_area_size(40)
         .y_label_area_size(40)
-        .build_cartesian_2d(0f32..NUM_SECS_TO_PLOT as f32, 0f32..1f32)?;
+        .build_cartesian_2d(0f32..NUM_SECS_TO_PLOT as f32, 0f32..1.15f32)?;
 
     chart
         .configure_mesh()
