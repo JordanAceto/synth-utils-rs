@@ -41,9 +41,10 @@ pub struct Conversion {
     pub fraction: f32,
 }
 
+#[allow(clippy::new_without_default)]
 impl Conversion {
-    /// `Conversion::default()` is a new default conversion
-    pub fn default() -> Self {
+    /// `Conversion::new()` is a new conversion
+    pub fn new() -> Self {
         Self {
             note_num: 0,
             stairstep: f32::MIN, // initialized so that hysteresis doesn't influence the first conversion
@@ -52,20 +53,14 @@ impl Conversion {
     }
 }
 
-impl Default for Quantizer {
-    /// `Quantizer::default()` is a new default quantizer with all notes allowed.
-    fn default() -> Self {
-        Self {
-            cached_conversion: Conversion::default(),
-            allowed: 0b0000_1111_1111_1111, // all 12 notes allowed
-        }
-    }
-}
-
+#[allow(clippy::new_without_default)]
 impl Quantizer {
     /// `Quantizer::new()` is a new quantizer with all notes allowed.
     pub fn new() -> Self {
-        Self::default()
+        Self {
+            cached_conversion: Conversion::new(),
+            allowed: 0b0000_1111_1111_1111, // all 12 notes allowed
+        }
     }
 
     /// `q.convert(val)` is the quantized version of the input value.
