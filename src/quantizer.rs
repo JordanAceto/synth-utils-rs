@@ -95,6 +95,7 @@ impl Quantizer {
             let high_bound = self.cached_conversion.stairstep + SEMITONE_WIDTH + HYSTERESIS;
 
             if low_bound < v_in && v_in < high_bound {
+                self.cached_conversion.fraction = v_in - self.cached_conversion.stairstep;
                 return self.cached_conversion;
             }
         }
@@ -393,5 +394,13 @@ mod tests {
                 .note_num,
             2
         );
+    }
+
+    #[test]
+    fn stairstep_plus_fraction_is_vin() {
+        let mut q = Quantizer::new();
+        let v_in = 1.234;
+        let conversion = q.convert(v_in);
+        assert_eq!(conversion.stairstep + conversion.fraction, v_in);
     }
 }
