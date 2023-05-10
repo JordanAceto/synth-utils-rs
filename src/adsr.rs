@@ -93,6 +93,8 @@ impl Adsr {
             self.phase_accumulator.tick();
 
             if self.phase_accumulator.rolled_over() {
+                self.phase_accumulator.reset();
+
                 self.state = match self.state {
                     State::Attack => State::Decay,
                     State::Decay => State::Sustain,
