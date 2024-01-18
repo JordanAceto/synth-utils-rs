@@ -25,6 +25,7 @@
 use crate::{lookup_tables, phase_accumulator::PhaseAccumulator, utils::*};
 
 /// A Low Frequency Oscillator is represented here
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Lfo {
     phase_accumulator: PhaseAccumulator<TOT_NUM_ACCUM_BITS, NUM_LUT_INDEX_BITS>,
 }
@@ -45,6 +46,11 @@ impl Lfo {
     /// `lfo.set_frequency(f)` sets the frequency of the LFO to `f`
     pub fn set_frequency(&mut self, freq: f32) {
         self.phase_accumulator.set_frequency(freq)
+    }
+
+    /// `lfo.reset()` sets the oscillator into the start position`
+    pub fn reset(&mut self) {
+        self.phase_accumulator.reset()
     }
 
     /// `lfo.get(ws)` is the current value of the given waveshape in `[-1.0, +1.0]`
@@ -87,7 +93,7 @@ impl Lfo {
 /// LFO waveshapes are represented here
 ///
 /// All waveshapes are simultaneously available
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq)]
 pub enum Waveshape {
     Sine,
     Triangle,
