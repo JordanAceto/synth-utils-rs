@@ -39,6 +39,7 @@
 
 use crate::{lookup_tables, phase_accumulator::PhaseAccumulator, utils::*};
 
+#[derive(Debug, Clone, Copy)]
 /// An ADSR envelope generator is represented here
 pub struct Adsr {
     attack_time: TimePeriod,
@@ -239,6 +240,7 @@ impl Adsr {
 /// ADSR input types are represented here
 ///
 /// A, D, and S are represented as positive-only time periods, S is represented as a number in `[0.0, 1.0]`
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Input {
     Attack(TimePeriod),
     Decay(TimePeriod),
@@ -249,6 +251,7 @@ pub enum Input {
 /// A time period in seconds is represented here
 ///
 /// Time periods are positive only numbers with min and max values in a pleasing range for users of the ADSR
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TimePeriod(f32);
 
 impl From<f32> for TimePeriod {
@@ -258,6 +261,7 @@ impl From<f32> for TimePeriod {
 }
 
 /// A sustain level in the range `[0.0, 1.0]` is represented here
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SustainLevel(f32);
 
 impl From<f32> for SustainLevel {

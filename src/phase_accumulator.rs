@@ -5,6 +5,7 @@
 /// * `TOTAL_NUM_BITS` - the total number of bits to use for the accumulator, in `[1..31]`
 ///
 /// * `NUM_INDEX_BITS` - the number of bits to use as index bits, in `[1..TOTAL_NUM_BITS]`
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PhaseAccumulator<const TOTAL_NUM_BITS: u32, const NUM_INDEX_BITS: u32> {
     sample_rate_hz: f32,
     rollover_mask: u32,

@@ -25,6 +25,7 @@
 use crate::{lookup_tables, phase_accumulator::PhaseAccumulator, utils::*};
 
 /// A Low Frequency Oscillator is represented here
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Lfo {
     phase_accumulator: PhaseAccumulator<TOT_NUM_ACCUM_BITS, NUM_LUT_INDEX_BITS>,
 }
@@ -87,7 +88,7 @@ impl Lfo {
 /// LFO waveshapes are represented here
 ///
 /// All waveshapes are simultaneously available
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq)]
 pub enum Waveshape {
     Sine,
     Triangle,
