@@ -48,6 +48,11 @@ impl Lfo {
         self.phase_accumulator.set_frequency(freq)
     }
 
+    /// `lfo.reset()` sets the oscillator into the start position`
+    pub fn reset(&mut self) {
+        self.phase_accumulator.reset()
+    }
+
     /// `lfo.get(ws)` is the current value of the given waveshape in `[-1.0, +1.0]`
     pub fn get(&self, waveshape: Waveshape) -> f32 {
         match waveshape {
