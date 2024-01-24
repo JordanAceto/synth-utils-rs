@@ -260,6 +260,12 @@ impl From<f32> for TimePeriod {
     }
 }
 
+impl From<TimePeriod> for f32 {
+    fn from(val: TimePeriod) -> Self {
+        val.0
+    }
+}
+
 /// A sustain level in the range `[0.0, 1.0]` is represented here
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SustainLevel(f32);
@@ -267,6 +273,12 @@ pub struct SustainLevel(f32);
 impl From<f32> for SustainLevel {
     fn from(val: f32) -> Self {
         Self(val.max(0.0_f32).min(1.0_f32))
+    }
+}
+
+impl From<SustainLevel> for f32 {
+    fn from(val: SustainLevel) -> Self {
+        val.0
     }
 }
 
