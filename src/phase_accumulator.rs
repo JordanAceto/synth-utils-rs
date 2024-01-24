@@ -52,6 +52,12 @@ impl<const TOTAL_NUM_BITS: u32, const NUM_INDEX_BITS: u32>
         self.set_frequency(1.0_f32 / period_sec)
     }
 
+    /// `lfo.set_phase()` sets the accumulator into a certain phase `[0.0, 1.0]`
+    pub fn set_phase(&mut self, phase: f32) {
+        self.reset();
+        self.accumulator = (self.rollover_mask as f32 * phase) as u32;
+    }
+
     // `pa.ramp()` is the current value of the phase accumulator as a number in `[0.0, 1.0]`
     pub fn ramp(&self) -> f32 {
         self.accumulator as f32 / ((1 << TOTAL_NUM_BITS) as f32)
