@@ -53,9 +53,11 @@ impl Lfo {
         self.phase_accumulator.reset()
     }
 
-    /// `lfo.set_phase()` sets the oscillator into a certain phase `[0.0, 1.0]`
+    /// `lfo.set_phase()` sets the oscillator into a certain phase. A complete cycle (2pi radians) is represented
+    /// with the 0.0-1.0 interval. Any negative or positive input is accepted and will be normalized to the
+    /// 0.0-1.0 range internally.
     pub fn set_phase(&mut self, phase: f32) {
-        self.phase_accumulator.set_phase(phase % 1.0)
+        self.phase_accumulator.set_phase(phase)
     }
 
     /// `lfo.get(ws)` is the current value of the given waveshape in `[-1.0, +1.0]`
@@ -227,5 +229,30 @@ mod tests {
             lfo.tick();
             assert_eq!(lfo.get(Waveshape::UpSaw), -lfo.get(Waveshape::DownSaw));
         }
+    }
+
+    #[test]
+    fn set_phase_values() {
+        let mut lfo = Lfo::new(100.0_f32);
+        lfo.set_frequency(1.0);
+
+        let epsilon = 0.001;
+
+        // zero means start position
+        lfo.set_phase(0.0);
+        assert!(is_almost(lfo.get(Waveshape::Triangle), 0.0, epsilon));
+
+        // anything .0 also means start position
+        lfo.set_phase(-2.0);
+        assert!(is_almost(lfo.get(Waveshape::Sine), 0.0, epsilon));
+
+        // doing a quarter cycle with tick()
+        for _ in 0..25 {
+            lfo.tick();
+        }
+        // gets sine to the top
+        assert!(is_almost(lfo.get(Waveshape::Triangle), 1.0, epsilon));
+        // and saw to in the middle of the negative part
+        assert!(is_almost(lfo.get(Waveshape::UpSaw), -0.5, epsilon));
     }
 }
