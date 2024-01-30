@@ -52,6 +52,17 @@ impl<const TOTAL_NUM_BITS: u32, const NUM_INDEX_BITS: u32>
         self.set_frequency(1.0_f32 / period_sec)
     }
 
+    /// `lfo.set_phase()` sets the accumulator into a certain phase. A complete cycle (2pi radians) is represented
+    /// with the 0.0-1.0 interval. Any negative or positive input is accepted and will be normalized to the
+    /// 0.0-1.0 range.
+    pub fn set_phase(&mut self, mut phase: f32) {
+        self.reset();
+        if phase < 0.0 {
+            phase *= -1.0;
+        }
+        self.accumulator = (self.rollover_mask as f32 * (phase % 1.0)) as u32;
+    }
+
     // `pa.ramp()` is the current value of the phase accumulator as a number in `[0.0, 1.0]`
     pub fn ramp(&self) -> f32 {
         self.accumulator as f32 / ((1 << TOTAL_NUM_BITS) as f32)
@@ -150,5 +161,27 @@ mod tests {
         // one more tick rolls back to the beginning
         pa.tick();
         assert!(is_almost(pa.ramp(), 0.0, epsilon));
+    }
+
+    #[test]
+    fn set_phase() {
+        let sample_rate = 1_000.0_f32;
+        let mut pa = PhaseAccumulator::<24, 8>::new(sample_rate);
+        pa.set_period(1.0_f32);
+
+        let epsilon = 0.001;
+
+        // ramp without any tick() should represent the phase we just set
+        for i in 0..10 {
+            pa.set_phase(i as f32 / 10.0);
+            assert!(is_almost(pa.ramp(), i as f32 / 10.0, epsilon));
+        }
+
+        // ticking the ramp to 25%
+        pa.set_phase(0.0);
+        for _ in 0..250 {
+            pa.tick();
+        }
+        assert!(is_almost(pa.ramp(), 0.25, epsilon));
     }
 }
